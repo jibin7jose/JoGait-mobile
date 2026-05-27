@@ -1,21 +1,26 @@
 import axios from 'axios';
+import { getToken } from './auth';
 
-// IMPORTANT: If testing on a physical iPhone/Android, 'localhost' will NOT work.
-// You must replace this with your computer's local Wi-Fi IP address (e.g., http://192.168.1.10:3000/api)
+// Update with your local IP when testing on a physical device!
 const API_URL = 'http://localhost:3000/api'; 
 
-// In a real app, this would be fetched from expo-secure-store after the patient logs in
-const MOCK_PATIENT_TOKEN = 'your_auth_token_here';
-
-export const syncSession = async (sessionData: any) => {
+export const syncSessionToCloud = async (sessionData: any) => {
   try {
-    console.log(`Syncing session ${sessionData.id} to backend...`);
+    // 1. Fetch the secure JWT token that we saved during login
+    const token = await getToken();
+    
+    if (!token) {
+      throw new Error("No authentication token found. Cannot sync.");
+    }
+
+    // 2. Transmit the data to the Node.js backend
     const response = await axios.post(`${API_URL}/sessions/upload`, sessionData, {
-      headers: { Authorization: `Bearer ${MOCK_PATIENT_TOKEN}` }
+      headers: { Authorization: `Bearer ${token}` }
     });
+    
     return response.data;
   } catch (error) {
     console.error('Failed to sync session to cloud:', error);
-    throw error; // Let the caller handle retries
+    throw error; 
   }
 };

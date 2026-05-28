@@ -28,3 +28,18 @@ export const logout = async () => {
 export const getToken = async () => {
   return await SecureStore.getItemAsync('userToken');
 };
+
+export const getCurrentUser = async () => {
+  const token = await getToken();
+
+  if (!token) {
+    throw new Error('No authentication token found.');
+  }
+
+  const response = await axios.get(`${API_URL}/me`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  await SecureStore.setItemAsync('userData', JSON.stringify(response.data.user));
+  return response.data.user;
+};

@@ -6,6 +6,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import CameraScreen from './src/screens/CameraScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import { initDb } from './src/db/sqlite';
+import { getCurrentUser, logout } from './src/api/auth';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,10 +23,13 @@ export default function App() {
         // Check if the user already logged in previously
         const token = await SecureStore.getItemAsync('userToken');
         if (token) {
+          await getCurrentUser();
           setIsAuthenticated(true);
         }
       } catch (err) {
         console.error("Bootstrap failed:", err);
+        await logout();
+        setIsAuthenticated(false);
       } finally {
         setIsReady(true);
       }
